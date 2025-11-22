@@ -11,5 +11,5 @@ pip install -r requirements.txt
 
 ## 2. distilBERT fine-tuning
 ```
-run distilbert-sentiment-amazon\src\train_distilbert.py
+python src\train_distilbert.py
 ```
