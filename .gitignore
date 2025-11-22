@@ -1,0 +1,2 @@
+# 忽略数据的上传
+distilbert-sentiment-amazon/data/*.bz2
