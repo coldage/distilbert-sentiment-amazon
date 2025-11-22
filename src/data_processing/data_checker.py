@@ -41,7 +41,8 @@ def get_texts_and_labels(path, encoding='utf-8', total_lines=None):
     with bz2.open(path, 'rt', encoding=encoding) as f:
         for line in tqdm(f, total=total_lines, desc="加载数据"):
             parts = line.split(' ', 1)
-            label = int(parts[0].removeprefix('__label__'))
+            label = int(parts[0].removeprefix('__label__')) # 标签1表示1-2星的负面评价，标签2表示4-5星的正面评价
+            label = int(label)-1 # 处理为0为负面，1为正面
             text = parts[1].strip()
             labels.append(label)
             texts.append(text)
@@ -54,7 +55,7 @@ def get_texts_and_labels(path, encoding='utf-8', total_lines=None):
 def labels_analysis(labels):
     cnt = [0, 0] # 记录正负标签评论的数目
     for label in labels:
-        cnt[int(label)-1] += 1 # 标签1表示1-2星的负面评价，标签2表示4-5星的正面评价
+        cnt[label] += 1 
     return cnt
 
 

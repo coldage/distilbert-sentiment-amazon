@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 # 数据集类
 class MyTextDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length=512):
+    def __init__(self, texts, labels, tokenizer, max_length=50):
         self.texts = texts
         self.labels = labels
         self.tokenizer = tokenizer

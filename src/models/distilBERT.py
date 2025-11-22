@@ -29,7 +29,7 @@ def train_distilBERT(train_texts, train_labels, model, output_dir="output"):
     print("Tokenizer ready.")
     # 准备数据加载器
     train_dataset = MyTextDataset(train_texts, train_labels, tokenizer)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
     print("Data ready.")
     
     # 优化器
