@@ -1,8 +1,17 @@
+"""
+===========================================
+PART 1: DATA LOADING AND CHECKING
+===========================================
+This module handles loading Amazon review data from bz2 files.
+"""
+
 import bz2
 import math
 import os
 import rootutils
 from tqdm import tqdm
+import random
+from data_processing.data_preprocesser import preprocess_texts
 
 ############
 ## Configs #
@@ -34,18 +43,53 @@ def print_firstN(path, N=5, encoding='utf-8'):
 
 # 2. 读取数据，得到标签和文本
 # 进度条需要预设total_lines，train是3600000，test是400000
-def get_texts_and_labels(path, encoding='utf-8', total_lines=None):
+# ADDED: Support for data sampling (10% option) and text preprocessing
+def get_texts_and_labels(path, encoding='utf-8', total_lines=None, 
+                        sample_ratio=1.0, apply_preprocessing=True, random_seed=42):
+    """
+    Load texts and labels from bz2 file.
+    
+    Args:
+        path: Path to bz2 file
+        encoding: File encoding
+        total_lines: Total number of lines (for progress bar)
+        sample_ratio: Ratio of data to sample (1.0 = all, 0.1 = 10%)
+        apply_preprocessing: Whether to apply text preprocessing
+        random_seed: Random seed for sampling
+        
+    Returns:
+        texts, labels, size
+    """
     labels = []
     texts = []
     
+    # Set random seed for reproducible sampling
+    random.seed(random_seed)
+    
     with bz2.open(path, 'rt', encoding=encoding) as f:
         for line in tqdm(f, total=total_lines, desc="加载数据"):
+            # Sample data if needed
+            if sample_ratio < 1.0 and random.random() > sample_ratio:
+                continue
+                
             parts = line.split(' ', 1)
+            if len(parts) < 2:
+                continue
+                
             label = int(parts[0].removeprefix('__label__')) # 标签1表示1-2星的负面评价，标签2表示4-5星的正面评价
             label = int(label)-1 # 处理为0为负面，1为正面
             text = parts[1].strip()
+            
+            # Skip 3-star reviews (neutral) - they should be filtered out
+            # Label 1 = 1-2 stars (negative), Label 2 = 4-5 stars (positive)
+            # After conversion: 0 = negative, 1 = positive
+            
             labels.append(label)
             texts.append(text)
+    
+    # Apply preprocessing if requested
+    if apply_preprocessing:
+        texts = preprocess_texts(texts)
     
     size = len(labels)
     return texts, labels, size

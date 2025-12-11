@@ -1,23 +1,59 @@
-from transformers import AutoTokenizer
-import torch
+"""
+===========================================
+PART 1: TEXT PREPROCESSING
+===========================================
+This module handles text preprocessing for Amazon reviews:
+- Remove HTML tags
+- Remove URL links
+- Convert to lowercase
+- Remove special symbols (keep English punctuation)
+"""
 
-# distilBERT对应的数据预处理函数
-# 修改句子长度等，需要在函数体内部更改
-# 实际上，这个函数没用到，分词操作在models/distilBERT.py/train_distilBERT里面
-# def distilBERT_preprocessor(train_texts, train_labels, test_texts, test_labels):
-#     # 创建分词器
-#     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-#     max_length = 512 # 最大句子长度
+import re
+from typing import List
 
-#     # 预处理
-#     train_encodings = tokenizer(train_texts, truncation=True, padding=True, max_length=max_length)
-#     train_inputs = torch.tensor(train_encodings['input_ids'])
-#     train_masks = torch.tensor(train_encodings['attention_mask'])
-#     train_labels = torch.tensor(train_labels)
 
-#     test_encodings = tokenizer(test_texts, truncation=True, padding=True, max_length=max_length)
-#     test_inputs = torch.tensor(test_encodings['input_ids'])
-#     test_masks = torch.tensor(test_encodings['attention_mask'])
-#     test_labels = torch.tensor(test_labels)
+def preprocess_text(text: str) -> str:
+    """
+    Preprocess a single text according to task requirements:
+    1. Remove HTML tags (e.g., <br>)
+    2. Remove URL links (e.g., https://amzn.to/xxx)
+    3. Convert to lowercase (required for DistilBERT-base-uncased)
+    4. Remove special symbols, keep English punctuation (.,?!)
+    
+    Args:
+        text: Raw review text
+        
+    Returns:
+        Preprocessed text
+    """
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # Remove URL links
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)
+    
+    # Convert to lowercase
+    text = text.lower()
+    
+    # Remove special symbols but keep English punctuation and alphanumeric
+    # Keep: letters, numbers, spaces, and basic punctuation (.,?!)
+    text = re.sub(r'[^a-z0-9\s.,?!]', '', text)
+    
+    # Clean up multiple spaces
+    text = re.sub(r'\s+', ' ', text)
+    
+    return text.strip()
 
-#     return train_inputs, train_masks, train_labels, test_inputs, test_masks, test_labels
+
+def preprocess_texts(texts: List[str]) -> List[str]:
+    """
+    Preprocess a list of texts.
+    
+    Args:
+        texts: List of raw review texts
+        
+    Returns:
+        List of preprocessed texts
+    """
+    return [preprocess_text(text) for text in texts]
