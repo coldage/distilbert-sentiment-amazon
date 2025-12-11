@@ -2,8 +2,8 @@ import torch
 from torch.utils.data import Dataset
 
 # 数据集类
-class MyTextDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length=50):
+class SentimentDataset(Dataset):
+    def __init__(self, texts, labels, tokenizer, max_length=100):
         self.texts = texts
         self.labels = labels
         self.tokenizer = tokenizer
@@ -18,16 +18,17 @@ class MyTextDataset(Dataset):
         text = self.texts[idx]
         label = self.labels[idx]
         
+        # 对文本进行分词
         encoding = self.tokenizer(
             text,
             max_length=self.max_length,
             padding='max_length',
             truncation=True,
-            return_tensors='pt'
+            return_tensors=None
         )
         
         return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
+            'input_ids': encoding['input_ids'],
+            'attention_mask': encoding['attention_mask'],
             'labels': torch.tensor(label, dtype=torch.long)
         }
